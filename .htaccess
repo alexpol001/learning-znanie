@@ -1,0 +1,28 @@
+Options +FollowSymLinks
+IndexIgnore */*
+RewriteEngine on
+
+<IfModule mod_rewrite.c>
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Если запрос начинается с /administrator, то заменяем на /backend/web/
+RewriteCond %{REQUEST_URI} ^/administrator
+RewriteRule ^administrator\/?(.*) /backend/web/$1
+
+# Добавляем другой запрос /frontend/web/$1
+RewriteCond %{REQUEST_URI} !^/(frontend/web|backend/web|administrator)
+RewriteRule (.*) /frontend/web/$1
+
+# Если frontend запрос
+RewriteCond %{REQUEST_URI} ^/frontend/web
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /frontend/web/index.php
+
+# Если backend запрос
+RewriteCond %{REQUEST_URI} ^/backend/web
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /backend/web/index.php
